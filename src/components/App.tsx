@@ -1,7 +1,7 @@
-import * as React from 'react';
+import React from 'react';
 import { Layout } from 'antd';
 const { Header, Footer, Sider, Content } = Layout;
-import './App.scss';
+import '../style/App.scss';
 
 class App extends React.Component {
   render() {
