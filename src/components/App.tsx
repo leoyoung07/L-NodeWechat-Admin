@@ -1,4 +1,5 @@
 import React from 'react';
+import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import { Layout } from 'antd';
 const { Header, Footer, Sider, Content } = Layout;
 import '../style/App.scss';
