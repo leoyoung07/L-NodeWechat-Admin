@@ -1,11 +1,28 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import { Layout } from 'antd';
 const { Header, Footer, Sider, Content } = Layout;
+import { Redirect } from 'react-router-dom';
 import '../style/App.scss';
 
-class App extends React.Component {
+interface IProps {
+
+}
+interface IState {
+  loggedIn: boolean;
+}
+
+class App extends React.Component<IProps, IState> {
+
+  constructor (props: IProps) {
+    super(props);
+    this.state = {
+      loggedIn: false
+    };
+  }
   render() {
+    if (!this.state.loggedIn) {
+      return <Redirect to="/login"/>;
+    }
     return (
       <div className="App">
         <Layout>
