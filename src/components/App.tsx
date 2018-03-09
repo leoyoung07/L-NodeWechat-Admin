@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout } from 'antd';
 const { Header, Footer, Sider, Content } = Layout;
 import { Redirect } from 'react-router-dom';
+import {  } from 'redux';
 import '../style/App.scss';
 
 interface IProps {
@@ -20,6 +21,7 @@ class App extends React.Component<IProps, IState> {
     };
   }
   render() {
+
     if (!this.state.loggedIn) {
       return <Redirect to="/login"/>;
     }

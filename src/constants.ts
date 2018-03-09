@@ -1,0 +1,4 @@
+export enum LOGIN_ACTION {
+  LOGIN_SUCCESS = 'LOGIN_SUCCESS',
+  LOGOUT = 'LOGOUT'
+}
