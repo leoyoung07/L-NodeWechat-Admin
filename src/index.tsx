@@ -1,26 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import App from './components/App';
 import Login from './components/Login';
-import registerServiceWorker from './registerServiceWorker';
 import { store } from './helpers/store';
+import registerServiceWorker from './registerServiceWorker';
 import './style/index.scss';
 
-const render = () => {
-  ReactDOM.render(
+ReactDOM.render(
+  <Provider store={store}>
     <Router>
       <div>
-        <Route exact={true} path="/" component={App}/>
-        <Route exact={true} path="/login" component={Login}/>
+        <Route exact={true} path="/" component={App} />
+        <Route exact={true} path="/login" component={Login} />
       </div>
-    </Router>,
-    document.getElementById('root') as HTMLElement
-  );
-};
-render();
+    </Router>
+  </Provider>,
+  document.getElementById('root') as HTMLElement
+);
 registerServiceWorker();
-
-store.subscribe(() => {
-  render();
-});

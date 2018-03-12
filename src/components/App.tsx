@@ -1,21 +1,20 @@
-import React from 'react';
 import { Layout } from 'antd';
-const { Header, Footer, Sider, Content } = Layout;
+import React from 'react';
+import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
-import { store } from '../helpers/store';
+import { IState } from '../interfaces';
 import '../style/App.scss';
+const { Header, Footer, Sider, Content } = Layout;
 
 interface IProps {
-
-}
-interface IState {
-
+  loggedIn: boolean;
+  user: {};
 }
 
-class App extends React.Component<IProps, IState> {
+class App extends React.Component<IProps> {
   render() {
 
-    if (!store.getState().authentication.loggedIn) {
+    if (!this.props.loggedIn) {
       return <Redirect to="/login"/>;
     }
     return (
@@ -33,4 +32,11 @@ class App extends React.Component<IProps, IState> {
   }
 }
 
-export default App;
+function mapStateToProps(state: IState) {
+  return {
+    loggedIn: state.authentication.loggedIn,
+    user: {}
+  };
+}
+
+export default connect(mapStateToProps)(App);

@@ -1,23 +1,42 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
-import { store } from '../helpers/store';
 import { userActions } from '../actions';
+import { IAction, IState } from '../interfaces';
 import '../style/Login.scss';
 
-class Login extends React.Component {
-  loginClick () {
-    store.dispatch(userActions.login());
-  }
+interface IProps {
+  loggedIn: boolean;
+  user: {};
+  onLogin: () => void;
+}
+
+class Login extends React.Component<IProps> {
+
   render() {
-    if (store.getState().authentication.loggedIn) {
+    if (this.props.loggedIn) {
       return <Redirect to="/"/>;
     }
     return (
-      <div className="Login" onClick={this.loginClick}>
+      <div className="Login" onClick={this.props.onLogin}>
         Login
       </div>
     );
   }
 }
 
-export default Login;
+function mapStateToProps(state: IState) {
+  return {
+    loggedIn: state.authentication.loggedIn,
+    user: {}
+  };
+}
+
+function mapDispatchToProps(dispatch: (action: IAction) => void) {
+  return {
+    onLogin: () => {
+      dispatch(userActions.login());
+    }
+  };
+}
+export default connect(mapStateToProps, mapDispatchToProps)(Login);
