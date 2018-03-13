@@ -2,11 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
-import App from './components/App';
-import Login from './components/Login';
 import { store } from './helpers/store';
+import './index.scss';
 import registerServiceWorker from './registerServiceWorker';
-import './style/index.scss';
+import App from './views/App';
+import Login from './views/Login';
 
 ReactDOM.render(
   <Provider store={store}>

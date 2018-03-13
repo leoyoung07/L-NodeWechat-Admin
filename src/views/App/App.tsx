@@ -2,8 +2,8 @@ import { Layout } from 'antd';
 import React from 'react';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
-import { IState } from '../interfaces';
-import '../style/App.scss';
+import { IState } from '../../interfaces';
+import './App.scss';
 const { Header, Footer, Sider, Content } = Layout;
 
 interface IProps {

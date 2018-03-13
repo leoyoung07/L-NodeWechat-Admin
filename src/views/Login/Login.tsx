@@ -1,9 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
-import { userActions } from '../actions';
-import { IAction, IState } from '../interfaces';
-import '../style/Login.scss';
+import { userActions } from '../../actions';
+import { IAction, IState } from '../../interfaces';
+import './Login.scss';
 
 interface IProps {
   loggedIn: boolean;
