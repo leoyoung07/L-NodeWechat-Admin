@@ -1,8 +1,7 @@
 import { Layout } from 'antd';
 import React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { history } from '../../helpers';
+import { Link } from 'react-router';
 import { IAction, IState } from '../../interfaces';
 import './App.scss';
 const { Header, Footer, Sider, Content } = Layout;
@@ -15,7 +14,6 @@ interface IProps {
 class App extends React.Component<IProps> {
   constructor (props: IProps) {
     super(props);
-    history.push('/');
   }
   render() {
     return (

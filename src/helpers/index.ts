@@ -1,2 +1,2 @@
-export * from './history';
+export * from './checkAuth';
 export * from './store';

@@ -1,9 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
-import PrivateRoute from './components/PrivateRoute';
-import { store } from './helpers';
+import { browserHistory, Route, Router } from 'react-router';
+import { checkAuth, store } from './helpers';
 import './index.scss';
 import registerServiceWorker from './registerServiceWorker';
 import App from './views/App';
@@ -11,9 +10,9 @@ import Login from './views/Login';
 
 ReactDOM.render(
   <Provider store={store}>
-    <Router>
+    <Router history={browserHistory}>
       <div>
-        <PrivateRoute exact={true} path="/" component={App} />
+        <Route path="/" component={App} onEnter={checkAuth} />
         <Route path="/login" component={Login} />
       </div>
     </Router>
