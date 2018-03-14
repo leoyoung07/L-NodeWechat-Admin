@@ -2,7 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
-import { store } from './helpers/store';
+import PrivateRoute from './components/PrivateRoute';
+import { store } from './helpers';
 import './index.scss';
 import registerServiceWorker from './registerServiceWorker';
 import App from './views/App';
@@ -12,8 +13,8 @@ ReactDOM.render(
   <Provider store={store}>
     <Router>
       <div>
-        <Route exact={true} path="/" component={App} />
-        <Route exact={true} path="/login" component={Login} />
+        <PrivateRoute exact={true} path="/" component={App} />
+        <Route path="/login" component={Login} />
       </div>
     </Router>
   </Provider>,

@@ -1,22 +1,24 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Redirect } from 'react-router-dom';
 import { userActions } from '../../actions';
-import { IAction, IState } from '../../interfaces';
+import { IState } from '../../interfaces';
 import './Login.scss';
 
 interface IProps {
   loggedIn: boolean;
   user: {};
   onLogin: () => void;
+  onLogout: () => void;
 }
 
 class Login extends React.Component<IProps> {
 
+  constructor (props: IProps) {
+    super(props);
+    this.props.onLogout();
+  }
+
   render() {
-    if (this.props.loggedIn) {
-      return <Redirect to="/"/>;
-    }
     return (
       <div className="Login" onClick={this.props.onLogin}>
         Login
@@ -32,10 +34,13 @@ function mapStateToProps(state: IState) {
   };
 }
 
-function mapDispatchToProps(dispatch: (action: IAction) => void) {
+function mapDispatchToProps(dispatch: Function) {
   return {
     onLogin: () => {
       dispatch(userActions.login());
+    },
+    onLogout: () => {
+      dispatch(userActions.logout());
     }
   };
 }

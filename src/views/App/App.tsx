@@ -1,8 +1,9 @@
 import { Layout } from 'antd';
 import React from 'react';
 import { connect } from 'react-redux';
-import { Redirect } from 'react-router-dom';
-import { IState } from '../../interfaces';
+import { Link } from 'react-router-dom';
+import { history } from '../../helpers';
+import { IAction, IState } from '../../interfaces';
 import './App.scss';
 const { Header, Footer, Sider, Content } = Layout;
 
@@ -12,15 +13,18 @@ interface IProps {
 }
 
 class App extends React.Component<IProps> {
+  constructor (props: IProps) {
+    super(props);
+    history.push('/');
+  }
   render() {
-
-    if (!this.props.loggedIn) {
-      return <Redirect to="/login"/>;
-    }
     return (
       <div className="App">
         <Layout>
-          <Header>Header</Header>
+          <Header>
+            Header
+            <Link to="/login">logout</Link>
+          </Header>
           <Layout>
             <Sider>Sider</Sider>
             <Content>Content</Content>
@@ -39,4 +43,9 @@ function mapStateToProps(state: IState) {
   };
 }
 
-export default connect(mapStateToProps)(App);
+function mapDispatchToProps(dispatch: (action: IAction) => void) {
+  return {
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
