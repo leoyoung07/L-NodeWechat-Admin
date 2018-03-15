@@ -1,4 +1,4 @@
-import { LOGIN_ACTION } from '../constants';
+import { USER_ACTION } from '../constants';
 import { IAction } from '../interfaces';
 import { IAuthentication } from '../interfaces';
 
@@ -9,12 +9,12 @@ const defaultState: IAuthentication = {
 
 export function authentication(state: IAuthentication = defaultState, action: IAction): IAuthentication {
   switch (action.type) {
-    case LOGIN_ACTION.LOGIN_SUCCESS:
+    case USER_ACTION.LOGIN_SUCCESS:
       return {
         loggedIn: true,
         user: action.user
       };
-    case LOGIN_ACTION.LOGOUT:
+    case USER_ACTION.LOGOUT_SUCCESS:
       return {
         loggedIn: false,
         user: {}
