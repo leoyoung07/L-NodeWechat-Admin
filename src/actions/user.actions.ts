@@ -1,5 +1,6 @@
 import { browserHistory } from 'react-router';
 import { USER_ACTION } from '../constants';
+import { Storage } from '../helpers';
 import { IAction } from '../interfaces';
 
 export const userActions = {
@@ -9,7 +10,7 @@ export const userActions = {
 
 function login() {
   return (dispatch: (action: IAction) => void) => {
-    localStorage.setItem('loggedIn', 'true');
+    Storage.set('loggedIn', 'true');
     browserHistory.push('/');
     dispatch({
       type: USER_ACTION.LOGIN_SUCCESS,
@@ -20,7 +21,7 @@ function login() {
 
 function logout() {
   return (dispatch: (action: IAction) => void) => {
-    localStorage.setItem('loggedIn', 'false');
+    Storage.set('loggedIn', 'false');
     dispatch({
       type: USER_ACTION.LOGOUT_SUCCESS,
       user: {}
