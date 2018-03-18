@@ -1,21 +1,10 @@
-.Login {
-  text-align: center;
-
-  .Login-header {
-    background-color: #222;
-    height: 150px;
-    padding: 20px;
-
-    .Login-logo {
-      height: 80px;
-    }
-
-    h2 {
-      color: white;
-    }
+.App {
+  .logo {
+    height: 32px;
+    background: rgba(255,255,255,.2);
+    margin: 16px;
   }
-
-  .Login-intro {
-    font-size: large;
+  .right {
+    float: right;
   }
 }
