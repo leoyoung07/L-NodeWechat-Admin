@@ -55,7 +55,7 @@ class App extends React.Component<IProps> {
               <Link to="/login">logout</Link>
             </div>
           </Header>
-          <Content style={{ margin: '0 16px' }}>
+          <Content style={{ margin: '0 16px', position: 'relative' }}>
             {this.props.children}
           </Content>
           <Footer style={{ textAlign: 'center' }}>
