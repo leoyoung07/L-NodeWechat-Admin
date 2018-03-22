@@ -8,3 +8,14 @@
   justify-content: center;
   align-items: center;
 }
+
+.menu-designer__sub-menu {
+  cursor: pointer;
+  :hover {
+    background: black;
+  }
+}
+
+.ant-popover {
+  z-index: 999;
+}
