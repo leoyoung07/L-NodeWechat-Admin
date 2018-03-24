@@ -1,17 +1,20 @@
-import { Button, List, Modal, Popover } from 'antd';
 import React from 'react';
 import { connect } from 'react-redux';
 import './MenuDesigner.scss';
-
-const ButtonGroup = Button.Group;
 
 interface IProps {
   user: {};
 }
 
 interface IState {
-  modalVisible: boolean;
-  currentEditingItem: string | null;
+  currentEditingMenu: string | null;
+  menus: Array<IMenu>;
+}
+
+interface IMenu {
+  name: string;
+  type: string;
+  value: string | Array<IMenu>;
 }
 
 class MenuDesigner extends React.Component<IProps, IState> {
@@ -19,72 +22,77 @@ class MenuDesigner extends React.Component<IProps, IState> {
   constructor (props: IProps) {
     super(props);
     this.state = {
-      modalVisible: false,
-      currentEditingItem: null
+      currentEditingMenu: null,
+      menus: []
     };
-    this.handleModalCancel = this.handleModalCancel.bind(this);
-    this.handleModalOK = this.handleModalOK.bind(this);
-    this.handleSubMenuClick = this.handleSubMenuClick.bind(this);
+
+    this.handleAddMenuBtnClick = this.handleAddMenuBtnClick.bind(this);
+    this.handleAddSubMenuBtnClick = this.handleAddSubMenuBtnClick.bind(this);
   }
 
-  handleSubMenuClick (item: string) {
-    this.setState({
-      modalVisible: true,
-      currentEditingItem: item
-    });
-  }
-
-  handleModalOK () {
-    this.setState({
-      modalVisible: false,
-      currentEditingItem: null
-    });
-  }
-
-  handleModalCancel () {
-    this.setState({
-      modalVisible: false,
-      currentEditingItem: null
-    });
-  }
   render() {
-    const subMenus = (
-      <List
-        dataSource={[1, 2, 3]}
-        renderItem={(item: string) => (
-          <List.Item>
-            <div className="menu-designer__sub-menu" onClick={() => { this.handleSubMenuClick(item); }}>
-              {'SubMenu ' + item}
-            </div>
-          </List.Item>
-        )}
-      />
-    );
     return (
-      <div className="menu-designer__wrapper">
-        <ButtonGroup>
-          {[1, 2, 3].map((value) => (
-            <Popover
-              key={value}
-              content={<div>{subMenus}</div>}
-              placement="top"
-              trigger="click"
-            >
-              <Button size="large">Click me</Button>
-            </Popover>
-          ))}
-        </ButtonGroup>
-        <Modal
-          visible={this.state.modalVisible}
-          onOk={this.handleModalOK}
-          onCancel={this.handleModalCancel}
-        >
-          <div>
-            {this.state.currentEditingItem}
-          </div>
-        </Modal>
+      <div>
+        <ul>
+          {this.state.menus.map((menu, index) => {
+            return (
+              <li key={index}>
+                {menu.name}
+                <button
+                  // tslint:disable-next-line:no-any
+                  onClick={(e: any) => { this.handleAddSubMenuBtnClick(e, index); }}
+                >
+                  +
+                </button>
+                <ul>
+                  {(this.state.menus[index].value as Array<IMenu>).map((subMenu, subIndex) => {
+                    return (
+                      <li key={subIndex}>
+                        {subMenu.name}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </li>
+            );
+          })}
+        </ul>
+        <div>
+          <button onClick={this.handleAddMenuBtnClick}>+</button>
+        </div>
       </div>
     );
+  }
+
+  private handleAddMenuBtnClick () {
+    let menus = this.state.menus.slice();
+    if (menus.length < 3) {
+      const newMenu = {
+        name: 'new menu',
+        type: 'menu_group',
+        value: []
+      };
+      menus.push(newMenu);
+      this.setState({
+        menus: menus
+      });
+    }
+  }
+
+  private handleAddSubMenuBtnClick (e: MouseEvent, index: number) {
+    const menus = this.state.menus.slice();
+    let subMenus = menus[index].value as Array<IMenu>;
+    if (subMenus.length < 5) {
+      subMenus.push({
+        name: 'new sub-menu',
+        type: 'view',
+        value: ''
+      });
+      menus[index].value = subMenus;
+      this.setState({
+        menus: menus
+      });
+    }
   }
 }
 
