@@ -7,48 +7,73 @@ interface IProps {
 }
 
 interface IState {
-  currentEditingMenu: string | null;
-  menus: Array<IMenu>;
+  currentEditingButton: string | null;
+  buttons: Array<IButton>;
 }
 
-interface IMenu {
+interface IButton {
+  id: number;
   name: string;
   type: string;
-  value: string | Array<IMenu>;
+  value: string;
+  subButtons: Array<IButton>;
 }
 
 class MenuDesigner extends React.Component<IProps, IState> {
-
-  constructor (props: IProps) {
+  constructor(props: IProps) {
     super(props);
     this.state = {
-      currentEditingMenu: null,
-      menus: []
+      currentEditingButton: null,
+      buttons: []
     };
+  }
 
-    this.handleAddMenuBtnClick = this.handleAddMenuBtnClick.bind(this);
-    this.handleAddSubMenuBtnClick = this.handleAddSubMenuBtnClick.bind(this);
+  componentDidUpdate(prevProps: IProps, prevState: IState) {
+    // tslint:disable-next-line:no-console
+    console.log(prevState);
   }
 
   render() {
     return (
       <div>
         <ul>
-          {this.state.menus.map((menu, index) => {
+          {this.state.buttons.map((button, index) => {
             return (
               <li key={index}>
-                {menu.name}
+                {button.name}
                 <button
-                  // tslint:disable-next-line:no-any
-                  onClick={(e: any) => { this.handleAddSubMenuBtnClick(e, index); }}
+                  onClick={this.handleAddSubButtonClick.bind(
+                    this,
+                    index
+                  )}
+                  disabled={button.subButtons.length >= 5}
                 >
                   +
                 </button>
+                <button
+                  onClick={this.handleRemoveButtonClick.bind(
+                    this,
+                    index
+                  )}
+                >
+                  -
+                </button>
                 <ul>
-                  {(this.state.menus[index].value as Array<IMenu>).map((subMenu, subIndex) => {
+                  {(this.state.buttons[index].subButtons as Array<
+                    IButton
+                  >).map((subButton, subIndex) => {
                     return (
                       <li key={subIndex}>
-                        {subMenu.name}
+                        {subButton.name}
+                        <button
+                          onClick={this.handleRemoveSubButtonClick.bind(
+                            this,
+                            index,
+                            subIndex
+                          )}
+                        >
+                          -
+                        </button>
                       </li>
                     );
                   })}
@@ -58,41 +83,80 @@ class MenuDesigner extends React.Component<IProps, IState> {
           })}
         </ul>
         <div>
-          <button onClick={this.handleAddMenuBtnClick}>+</button>
+          <button
+            onClick={() => {
+              this.handleAddButtonClick();
+            }}
+            disabled={this.state.buttons.length >= 3}
+          >
+            +
+          </button>
         </div>
       </div>
     );
   }
 
-  private handleAddMenuBtnClick () {
-    let menus = this.state.menus.slice();
-    if (menus.length < 3) {
-      const newMenu = {
-        name: 'new menu',
-        type: 'menu_group',
-        value: []
+  private handleAddButtonClick() {
+    let buttons = this.state.buttons.slice();
+    if (buttons.length < 3) {
+      const nextButtonId = this.getNextButtonId(buttons);
+      const newButton = {
+        id: nextButtonId,
+        name: 'new button ' + nextButtonId,
+        type: 'button_group',
+        value: '',
+        subButtons: []
       };
-      menus.push(newMenu);
+      buttons.push(newButton);
       this.setState({
-        menus: menus
+        buttons: buttons
       });
     }
   }
 
-  private handleAddSubMenuBtnClick (e: MouseEvent, index: number) {
-    const menus = this.state.menus.slice();
-    let subMenus = menus[index].value as Array<IMenu>;
-    if (subMenus.length < 5) {
-      subMenus.push({
-        name: 'new sub-menu',
+  private handleAddSubButtonClick(index: number) {
+    const buttons = this.state.buttons.slice();
+    let subButtons = buttons[index].subButtons as Array<IButton>;
+    if (subButtons.length < 5) {
+      const nextButtonId = this.getNextButtonId(subButtons);
+      subButtons.push({
+        id: nextButtonId,
+        name: 'new sub-button ' + nextButtonId,
         type: 'view',
-        value: ''
+        value: '',
+        subButtons: []
       });
-      menus[index].value = subMenus;
+      buttons[index].subButtons = subButtons;
       this.setState({
-        menus: menus
+        buttons: buttons
       });
     }
+  }
+
+  private handleRemoveButtonClick(index: number) {
+    const buttons = this.state.buttons.slice();
+    if (buttons.length > 0) {
+      buttons.splice(index, 1);
+      this.setState({
+        buttons: buttons
+      });
+    }
+  }
+
+  private handleRemoveSubButtonClick(index: number, subIndex: number) {
+    const buttons = this.state.buttons.slice();
+    const subButtons = buttons[index].subButtons;
+    if (subButtons.length > 0) {
+      subButtons.splice(subIndex, 1);
+      buttons[index].subButtons = subButtons;
+      this.setState({
+        buttons: buttons
+      });
+    }
+  }
+
+  private getNextButtonId(buttons: Array<IButton>) {
+    return buttons[buttons.length - 1] ? buttons[buttons.length - 1].id + 1 : 0;
   }
 }
 
@@ -103,7 +167,6 @@ function mapStateToProps(state: {}) {
 }
 
 function mapDispatchToProps(dispatch: Function) {
-  return {
-  };
+  return {};
 }
 export default connect(mapStateToProps, mapDispatchToProps)(MenuDesigner);
