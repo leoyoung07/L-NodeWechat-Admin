@@ -7,7 +7,7 @@ interface IProps {
 }
 
 interface IState {
-  currentEditingButton: string | null;
+  currentEditingButton: IButton | null;
   buttons: Array<IButton>;
 }
 
@@ -15,7 +15,7 @@ interface IButton {
   id: number;
   name: string;
   type: string;
-  value: string;
+  url?: string;
   subButtons: Array<IButton>;
 }
 
@@ -35,62 +35,81 @@ class MenuDesigner extends React.Component<IProps, IState> {
 
   render() {
     return (
-      <div>
-        <ul>
-          {this.state.buttons.map((button, index) => {
-            return (
-              <li key={index}>
-                {button.name}
-                <button
-                  onClick={this.handleAddSubButtonClick.bind(
-                    this,
-                    index
-                  )}
-                  disabled={button.subButtons.length >= 5}
-                >
-                  +
-                </button>
-                <button
-                  onClick={this.handleRemoveButtonClick.bind(
-                    this,
-                    index
-                  )}
-                >
-                  -
-                </button>
-                <ul>
-                  {(this.state.buttons[index].subButtons as Array<
-                    IButton
-                  >).map((subButton, subIndex) => {
-                    return (
-                      <li key={subIndex}>
-                        {subButton.name}
-                        <button
-                          onClick={this.handleRemoveSubButtonClick.bind(
-                            this,
-                            index,
-                            subIndex
-                          )}
-                        >
-                          -
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </li>
-            );
-          })}
-        </ul>
+      <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around'}}>
         <div>
-          <button
-            onClick={() => {
-              this.handleAddButtonClick();
-            }}
-            disabled={this.state.buttons.length >= 3}
-          >
-            +
-          </button>
+          <ul>
+            {this.state.buttons.map((button, index) => {
+              return (
+                <li key={index}>
+                  {button.name}
+                  <button
+                    onClick={this.handleAddSubButtonClick.bind(
+                      this,
+                      index
+                    )}
+                    disabled={button.subButtons.length >= 5}
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={this.handleRemoveButtonClick.bind(
+                      this,
+                      index
+                    )}
+                  >
+                    -
+                  </button>
+                  <ul>
+                    {(this.state.buttons[index].subButtons as Array<
+                      IButton
+                    >).map((subButton, subIndex) => {
+                      return (
+                        <li
+                          key={subIndex}
+                          onClick={this.handleMenuButtonClick.bind(this, subButton)}
+                        >
+                          {subButton.name}
+                          <button
+                            onClick={this.handleRemoveSubButtonClick.bind(
+                              this,
+                              index,
+                              subIndex
+                            )}
+                          >
+                            -
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </li>
+              );
+            })}
+          </ul>
+          <div>
+            <button
+              onClick={() => {
+                this.handleAddButtonClick();
+              }}
+              disabled={this.state.buttons.length >= 3}
+            >
+              +
+            </button>
+          </div>
+        </div>
+        <div>
+          <div>
+            <label>name: </label>
+            <input type="text" value={this.state.currentEditingButton ? this.state.currentEditingButton.name : ''}/>
+          </div>
+          <div>
+            <label>type: </label>
+            <select />
+          </div>
+          <div>
+            <label>url: </label>
+            <input type="text" value={this.state.currentEditingButton ? this.state.currentEditingButton.url : ''}/>
+          </div>
         </div>
       </div>
     );
@@ -104,7 +123,6 @@ class MenuDesigner extends React.Component<IProps, IState> {
         id: nextButtonId,
         name: 'new button ' + nextButtonId,
         type: 'button_group',
-        value: '',
         subButtons: []
       };
       buttons.push(newButton);
@@ -123,7 +141,7 @@ class MenuDesigner extends React.Component<IProps, IState> {
         id: nextButtonId,
         name: 'new sub-button ' + nextButtonId,
         type: 'view',
-        value: '',
+        url: 'https://',
         subButtons: []
       });
       buttons[index].subButtons = subButtons;
@@ -143,7 +161,8 @@ class MenuDesigner extends React.Component<IProps, IState> {
     }
   }
 
-  private handleRemoveSubButtonClick(index: number, subIndex: number) {
+  private handleRemoveSubButtonClick(index: number, subIndex: number, e: React.MouseEvent<HTMLElement>) {
+    e.stopPropagation();
     const buttons = this.state.buttons.slice();
     const subButtons = buttons[index].subButtons;
     if (subButtons.length > 0) {
@@ -153,6 +172,12 @@ class MenuDesigner extends React.Component<IProps, IState> {
         buttons: buttons
       });
     }
+  }
+
+  private handleMenuButtonClick(button: IButton) {
+    this.setState({
+      currentEditingButton: button
+    });
   }
 
   private getNextButtonId(buttons: Array<IButton>) {
