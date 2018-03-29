@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 import { connect } from 'react-redux';
 import './MenuDesigner.scss';
@@ -17,6 +18,10 @@ interface IButton {
   type: string;
   url?: string;
   subButtons: Array<IButton>;
+
+  index: number;
+
+  subIndex: number | null;
 }
 
 class MenuDesigner extends React.Component<IProps, IState> {
@@ -26,6 +31,9 @@ class MenuDesigner extends React.Component<IProps, IState> {
       currentEditingButton: null,
       buttons: []
     };
+
+    this.handleNameInputChange = this.handleNameInputChange.bind(this);
+    this.handleUrlInputChange = this.handleUrlInputChange.bind(this);
   }
 
   componentDidUpdate(prevProps: IProps, prevState: IState) {
@@ -40,7 +48,10 @@ class MenuDesigner extends React.Component<IProps, IState> {
           <ul>
             {this.state.buttons.map((button, index) => {
               return (
-                <li key={index}>
+                <li
+                  key={index}
+                  onClick={this.handleMenuButtonClick.bind(this, index, null)}
+                >
                   {button.name}
                   <button
                     onClick={this.handleAddSubButtonClick.bind(
@@ -66,7 +77,7 @@ class MenuDesigner extends React.Component<IProps, IState> {
                       return (
                         <li
                           key={subIndex}
-                          onClick={this.handleMenuButtonClick.bind(this, subButton)}
+                          onClick={this.handleMenuButtonClick.bind(this, index, subIndex)}
                         >
                           {subButton.name}
                           <button
@@ -100,7 +111,11 @@ class MenuDesigner extends React.Component<IProps, IState> {
         <div>
           <div>
             <label>name: </label>
-            <input type="text" value={this.state.currentEditingButton ? this.state.currentEditingButton.name : ''}/>
+            <input
+              type="text"
+              value={this.state.currentEditingButton ? this.state.currentEditingButton.name : ''}
+              onChange={this.handleNameInputChange}
+            />
           </div>
           <div>
             <label>type: </label>
@@ -108,7 +123,18 @@ class MenuDesigner extends React.Component<IProps, IState> {
           </div>
           <div>
             <label>url: </label>
-            <input type="text" value={this.state.currentEditingButton ? this.state.currentEditingButton.url : ''}/>
+            <input
+              type="text"
+              value={this.state.currentEditingButton ? this.state.currentEditingButton.url : ''}
+              onChange={this.handleUrlInputChange}
+            />
+          </div>
+          <div>
+            <button
+              onClick={() => { this.handleUpdateClick(); }}
+            >
+              update
+            </button>
           </div>
         </div>
       </div>
@@ -116,24 +142,26 @@ class MenuDesigner extends React.Component<IProps, IState> {
   }
 
   private handleAddButtonClick() {
-    let buttons = this.state.buttons.slice();
+    let buttons = _.cloneDeep(this.state.buttons);
     if (buttons.length < 3) {
       const nextButtonId = this.getNextButtonId(buttons);
       const newButton = {
         id: nextButtonId,
         name: 'new button ' + nextButtonId,
         type: 'button_group',
-        subButtons: []
+        subButtons: [],
+        index: buttons.length,
+        subIndex: null
       };
       buttons.push(newButton);
       this.setState({
-        buttons: buttons
+        buttons
       });
     }
   }
 
   private handleAddSubButtonClick(index: number) {
-    const buttons = this.state.buttons.slice();
+    const buttons = _.cloneDeep(this.state.buttons);
     let subButtons = buttons[index].subButtons as Array<IButton>;
     if (subButtons.length < 5) {
       const nextButtonId = this.getNextButtonId(subButtons);
@@ -142,41 +170,93 @@ class MenuDesigner extends React.Component<IProps, IState> {
         name: 'new sub-button ' + nextButtonId,
         type: 'view',
         url: 'https://',
-        subButtons: []
+        subButtons: [],
+        index: index,
+        subIndex: subButtons.length
       });
       buttons[index].subButtons = subButtons;
       this.setState({
-        buttons: buttons
+        buttons
       });
     }
   }
 
   private handleRemoveButtonClick(index: number) {
-    const buttons = this.state.buttons.slice();
+    const buttons = _.cloneDeep(this.state.buttons);
     if (buttons.length > 0) {
       buttons.splice(index, 1);
       this.setState({
-        buttons: buttons
+        buttons
       });
     }
   }
 
   private handleRemoveSubButtonClick(index: number, subIndex: number, e: React.MouseEvent<HTMLElement>) {
     e.stopPropagation();
-    const buttons = this.state.buttons.slice();
+    const buttons = _.cloneDeep(this.state.buttons);
     const subButtons = buttons[index].subButtons;
     if (subButtons.length > 0) {
       subButtons.splice(subIndex, 1);
       buttons[index].subButtons = subButtons;
       this.setState({
-        buttons: buttons
+        buttons
       });
     }
   }
 
-  private handleMenuButtonClick(button: IButton) {
+  private handleMenuButtonClick(index: number, subIndex: number | null, e: React.MouseEvent<HTMLElement>) {
+    e.stopPropagation();
+    const buttons = _.cloneDeep(this.state.buttons);
+    let button = buttons[index];
+    if (subIndex !== null) {
+      button = button.subButtons[subIndex];
+    }
     this.setState({
       currentEditingButton: button
+    });
+  }
+
+  private handleUpdateClick() {
+    if (!this.state.currentEditingButton) {
+      return;
+    }
+    const buttons = _.cloneDeep(this.state.buttons);
+    const currentEditingButton = _.cloneDeep(this.state.currentEditingButton);
+    const index = currentEditingButton.index;
+    const subIndex = currentEditingButton.subIndex;
+    let button = buttons[index];
+    if (subIndex !== null) {
+      button = button.subButtons[subIndex];
+    }
+    for (const key in currentEditingButton) {
+      if (currentEditingButton.hasOwnProperty(key)) {
+        button[key] = currentEditingButton[key];
+      }
+    }
+    this.setState({
+      buttons
+    });
+  }
+
+  private handleNameInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!this.state.currentEditingButton) {
+      return;
+    }
+    const currentEditingButton = _.cloneDeep(this.state.currentEditingButton);
+    currentEditingButton.name = e.target.value;
+    this.setState({
+      currentEditingButton
+    });
+  }
+
+  private handleUrlInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!this.state.currentEditingButton) {
+      return;
+    }
+    const currentEditingButton = _.cloneDeep(this.state.currentEditingButton);
+    currentEditingButton.url = e.target.value;
+    this.setState({
+      currentEditingButton
     });
   }
 
