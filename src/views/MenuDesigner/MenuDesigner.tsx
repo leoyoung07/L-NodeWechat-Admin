@@ -24,6 +24,27 @@ interface IButton {
   subIndex: number | null;
 }
 
+enum ButtonType {
+  VIEW = 'view',
+  BUTTON_GROUP = 'button_group',
+  CLICK = 'click'
+}
+
+const buttonTypes = [
+  {
+    value: ButtonType.VIEW,
+    text: '打开链接'
+  },
+  {
+    value: ButtonType.CLICK,
+    text: '自动回复'
+  },
+  {
+    value: ButtonType.BUTTON_GROUP,
+    text: '父级按钮'
+  }
+];
+
 class MenuDesigner extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
@@ -34,6 +55,7 @@ class MenuDesigner extends React.Component<IProps, IState> {
 
     this.handleNameInputChange = this.handleNameInputChange.bind(this);
     this.handleUrlInputChange = this.handleUrlInputChange.bind(this);
+    this.handleTypeSelectChange = this.handleTypeSelectChange.bind(this);
   }
 
   componentDidUpdate(prevProps: IProps, prevState: IState) {
@@ -119,7 +141,18 @@ class MenuDesigner extends React.Component<IProps, IState> {
           </div>
           <div>
             <label>type: </label>
-            <select />
+            <select
+              value={this.state.currentEditingButton ? this.state.currentEditingButton.type : ButtonType.VIEW}
+              onChange={this.handleTypeSelectChange}
+            >
+              {buttonTypes.map((type, index) => {
+                return (
+                <option key={index} value={type.value}>
+                  {type.text}
+                </option>
+                );
+              })}
+            </select>
           </div>
           <div>
             <label>url: </label>
@@ -148,7 +181,7 @@ class MenuDesigner extends React.Component<IProps, IState> {
       const newButton = {
         id: nextButtonId,
         name: 'new button ' + nextButtonId,
-        type: 'button_group',
+        type: ButtonType.BUTTON_GROUP,
         subButtons: [],
         index: buttons.length,
         subIndex: null
@@ -168,7 +201,7 @@ class MenuDesigner extends React.Component<IProps, IState> {
       subButtons.push({
         id: nextButtonId,
         name: 'new sub-button ' + nextButtonId,
-        type: 'view',
+        type: ButtonType.VIEW,
         url: 'https://',
         subButtons: [],
         index: index,
@@ -255,6 +288,17 @@ class MenuDesigner extends React.Component<IProps, IState> {
     }
     const currentEditingButton = _.cloneDeep(this.state.currentEditingButton);
     currentEditingButton.url = e.target.value;
+    this.setState({
+      currentEditingButton
+    });
+  }
+
+  private handleTypeSelectChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    if (!this.state.currentEditingButton) {
+      return;
+    }
+    const currentEditingButton = _.cloneDeep(this.state.currentEditingButton);
+    currentEditingButton.type = e.target.value;
     this.setState({
       currentEditingButton
     });
