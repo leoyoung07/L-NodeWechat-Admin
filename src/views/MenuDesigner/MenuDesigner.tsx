@@ -45,6 +45,149 @@ const buttonTypes = [
   }
 ];
 
+interface ILeftPanelProps {
+  buttons: Array<IButton>;
+  handleAddButtonClick: () => void;
+  handleAddSubButtonClick: (index: number) => void;
+  handleRemoveButtonClick: (index: number) => void;
+  handleRemoveSubButtonClick: (
+    index: number,
+    subIndex: number,
+    e: React.MouseEvent<HTMLElement>
+  ) => void;
+  handleMenuButtonClick: (
+    index: number,
+    subIndex: number | null,
+    e: React.MouseEvent<HTMLElement>
+  ) => void;
+}
+
+interface IRightPanelProps {
+  currentEditingButton: IButton | null;
+  handleNameInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleUrlInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleTypeSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleUpdateClick: () => void;
+}
+
+const LeftPanel = (props: ILeftPanelProps) => (
+  <div>
+    <ul>
+      {props.buttons.map((button, index) => {
+        return (
+          <li
+            key={index}
+            onClick={e => {
+              props.handleMenuButtonClick(index, null, e);
+            }}
+          >
+            {button.name}
+            <button
+              onClick={e => {
+                props.handleAddSubButtonClick(index);
+              }}
+              disabled={button.subButtons.length >= 5}
+            >
+              +
+            </button>
+            <button
+              onClick={e => {
+                props.handleRemoveButtonClick(index);
+              }}
+            >
+              -
+            </button>
+            <ul>
+              {(props.buttons[index].subButtons as Array<IButton>).map(
+                (subButton, subIndex) => {
+                  return (
+                    <li
+                      key={subIndex}
+                      onClick={e => {
+                        props.handleMenuButtonClick(index, subIndex, e);
+                      }}
+                    >
+                      {subButton.name}
+                      <button
+                        onClick={e => {
+                          props.handleRemoveSubButtonClick(index, subIndex, e);
+                        }}
+                      >
+                        -
+                      </button>
+                    </li>
+                  );
+                }
+              )}
+            </ul>
+          </li>
+        );
+      })}
+    </ul>
+    <div>
+      <button
+        onClick={e => {
+          props.handleAddButtonClick();
+        }}
+        disabled={props.buttons.length >= 3}
+      >
+        +
+      </button>
+    </div>
+  </div>
+);
+
+const RightPanel = (props: IRightPanelProps) => (
+  <div>
+    <div>
+      <label>name: </label>
+      <input
+        type="text"
+        value={
+          props.currentEditingButton ? props.currentEditingButton.name : ''
+        }
+        onChange={props.handleNameInputChange}
+      />
+    </div>
+    <div>
+      <label>type: </label>
+      <select
+        value={
+          props.currentEditingButton
+            ? props.currentEditingButton.type
+            : ButtonType.VIEW
+        }
+        onChange={props.handleTypeSelectChange}
+      >
+        {buttonTypes.map((type, index) => {
+          return (
+            <option key={index} value={type.value}>
+              {type.text}
+            </option>
+          );
+        })}
+      </select>
+    </div>
+    <div>
+      <label>url: </label>
+      <input
+        type="text"
+        value={
+          props.currentEditingButton
+            ? props.currentEditingButton.url
+              ? props.currentEditingButton.url
+              : ''
+            : ''
+        }
+        onChange={props.handleUrlInputChange}
+      />
+    </div>
+    <div>
+      <button onClick={props.handleUpdateClick}>update</button>
+    </div>
+  </div>
+);
+
 class MenuDesigner extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
@@ -53,123 +196,44 @@ class MenuDesigner extends React.Component<IProps, IState> {
       buttons: []
     };
 
+    this.handleAddButtonClick = this.handleAddButtonClick.bind(this);
+    this.handleAddSubButtonClick = this.handleAddSubButtonClick.bind(this);
+    this.handleRemoveButtonClick = this.handleRemoveButtonClick.bind(this);
+    this.handleRemoveSubButtonClick = this.handleRemoveSubButtonClick.bind(
+      this
+    );
+    this.handleMenuButtonClick = this.handleMenuButtonClick.bind(this);
+
     this.handleNameInputChange = this.handleNameInputChange.bind(this);
     this.handleUrlInputChange = this.handleUrlInputChange.bind(this);
     this.handleTypeSelectChange = this.handleTypeSelectChange.bind(this);
-  }
-
-  componentDidUpdate(prevProps: IProps, prevState: IState) {
-    // tslint:disable-next-line:no-console
-    console.log(prevState);
+    this.handleUpdateClick = this.handleUpdateClick.bind(this);
   }
 
   render() {
     return (
-      <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around'}}>
-        <div>
-          <ul>
-            {this.state.buttons.map((button, index) => {
-              return (
-                <li
-                  key={index}
-                  onClick={this.handleMenuButtonClick.bind(this, index, null)}
-                >
-                  {button.name}
-                  <button
-                    onClick={this.handleAddSubButtonClick.bind(
-                      this,
-                      index
-                    )}
-                    disabled={button.subButtons.length >= 5}
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={this.handleRemoveButtonClick.bind(
-                      this,
-                      index
-                    )}
-                  >
-                    -
-                  </button>
-                  <ul>
-                    {(this.state.buttons[index].subButtons as Array<
-                      IButton
-                    >).map((subButton, subIndex) => {
-                      return (
-                        <li
-                          key={subIndex}
-                          onClick={this.handleMenuButtonClick.bind(this, index, subIndex)}
-                        >
-                          {subButton.name}
-                          <button
-                            onClick={this.handleRemoveSubButtonClick.bind(
-                              this,
-                              index,
-                              subIndex
-                            )}
-                          >
-                            -
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </li>
-              );
-            })}
-          </ul>
-          <div>
-            <button
-              onClick={() => {
-                this.handleAddButtonClick();
-              }}
-              disabled={this.state.buttons.length >= 3}
-            >
-              +
-            </button>
-          </div>
-        </div>
-        <div>
-          <div>
-            <label>name: </label>
-            <input
-              type="text"
-              value={this.state.currentEditingButton ? this.state.currentEditingButton.name : ''}
-              onChange={this.handleNameInputChange}
-            />
-          </div>
-          <div>
-            <label>type: </label>
-            <select
-              value={this.state.currentEditingButton ? this.state.currentEditingButton.type : ButtonType.VIEW}
-              onChange={this.handleTypeSelectChange}
-            >
-              {buttonTypes.map((type, index) => {
-                return (
-                <option key={index} value={type.value}>
-                  {type.text}
-                </option>
-                );
-              })}
-            </select>
-          </div>
-          <div>
-            <label>url: </label>
-            <input
-              type="text"
-              value={this.state.currentEditingButton ? this.state.currentEditingButton.url : ''}
-              onChange={this.handleUrlInputChange}
-            />
-          </div>
-          <div>
-            <button
-              onClick={() => { this.handleUpdateClick(); }}
-            >
-              update
-            </button>
-          </div>
-        </div>
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-around'
+        }}
+      >
+        <LeftPanel
+          buttons={this.state.buttons}
+          handleAddButtonClick={this.handleAddButtonClick}
+          handleAddSubButtonClick={this.handleAddSubButtonClick}
+          handleMenuButtonClick={this.handleMenuButtonClick}
+          handleRemoveButtonClick={this.handleRemoveButtonClick}
+          handleRemoveSubButtonClick={this.handleRemoveSubButtonClick}
+        />
+        <RightPanel
+          currentEditingButton={this.state.currentEditingButton}
+          handleNameInputChange={this.handleNameInputChange}
+          handleUrlInputChange={this.handleUrlInputChange}
+          handleTypeSelectChange={this.handleTypeSelectChange}
+          handleUpdateClick={this.handleUpdateClick}
+        />
       </div>
     );
   }
@@ -224,7 +288,11 @@ class MenuDesigner extends React.Component<IProps, IState> {
     }
   }
 
-  private handleRemoveSubButtonClick(index: number, subIndex: number, e: React.MouseEvent<HTMLElement>) {
+  private handleRemoveSubButtonClick(
+    index: number,
+    subIndex: number,
+    e: React.MouseEvent<HTMLElement>
+  ) {
     e.stopPropagation();
     const buttons = _.cloneDeep(this.state.buttons);
     const subButtons = buttons[index].subButtons;
@@ -237,7 +305,11 @@ class MenuDesigner extends React.Component<IProps, IState> {
     }
   }
 
-  private handleMenuButtonClick(index: number, subIndex: number | null, e: React.MouseEvent<HTMLElement>) {
+  private handleMenuButtonClick(
+    index: number,
+    subIndex: number | null,
+    e: React.MouseEvent<HTMLElement>
+  ) {
     e.stopPropagation();
     const buttons = _.cloneDeep(this.state.buttons);
     let button = buttons[index];
