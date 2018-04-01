@@ -24,27 +24,6 @@ interface IButton {
   subIndex: number | null;
 }
 
-enum ButtonType {
-  VIEW = 'view',
-  BUTTON_GROUP = 'button_group',
-  CLICK = 'click'
-}
-
-const buttonTypes = [
-  {
-    value: ButtonType.VIEW,
-    text: '打开链接'
-  },
-  {
-    value: ButtonType.CLICK,
-    text: '自动回复'
-  },
-  {
-    value: ButtonType.BUTTON_GROUP,
-    text: '父级按钮'
-  }
-];
-
 interface ILeftPanelProps {
   buttons: Array<IButton>;
   handleAddButtonClick: () => void;
@@ -70,6 +49,77 @@ interface IRightPanelProps {
   handleUpdateClick: () => void;
 }
 
+interface ISubButtonsProps {
+  index: number;
+  subButtons: Array<IButton>;
+  handleAddSubButtonClick: (index: number) => void;
+  handleRemoveSubButtonClick: (
+    index: number,
+    subIndex: number,
+    e: React.MouseEvent<HTMLElement>
+  ) => void;
+  handleMenuButtonClick: (
+    index: number,
+    subIndex: number | null,
+    e: React.MouseEvent<HTMLElement>
+  ) => void;
+}
+
+enum ButtonType {
+  VIEW = 'view',
+  BUTTON_GROUP = 'button_group',
+  CLICK = 'click'
+}
+
+const buttonTypes = [
+  {
+    value: ButtonType.VIEW,
+    text: '打开链接'
+  },
+  {
+    value: ButtonType.CLICK,
+    text: '自动回复'
+  },
+  {
+    value: ButtonType.BUTTON_GROUP,
+    text: '父级按钮'
+  }
+];
+
+const SubButtons = (props: ISubButtonsProps) => (
+  <div>
+    <ul>
+      {props.subButtons.map((subButton, subIndex) => {
+        return (
+          <li
+            key={subIndex}
+            onClick={e => {
+              props.handleMenuButtonClick(props.index, subIndex, e);
+            }}
+          >
+            {subButton.name}
+            <button
+              onClick={e => {
+                props.handleRemoveSubButtonClick(props.index, subIndex, e);
+              }}
+            >
+              -
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+    <button
+      onClick={e => {
+        props.handleAddSubButtonClick(props.index);
+      }}
+      disabled={props.subButtons.length >= 5}
+    >
+      +
+    </button>
+  </div>
+);
+
 const LeftPanel = (props: ILeftPanelProps) => (
   <div>
     <ul>
@@ -84,42 +134,18 @@ const LeftPanel = (props: ILeftPanelProps) => (
             {button.name}
             <button
               onClick={e => {
-                props.handleAddSubButtonClick(index);
-              }}
-              disabled={button.subButtons.length >= 5}
-            >
-              +
-            </button>
-            <button
-              onClick={e => {
                 props.handleRemoveButtonClick(index);
               }}
             >
               -
             </button>
-            <ul>
-              {(props.buttons[index].subButtons as Array<IButton>).map(
-                (subButton, subIndex) => {
-                  return (
-                    <li
-                      key={subIndex}
-                      onClick={e => {
-                        props.handleMenuButtonClick(index, subIndex, e);
-                      }}
-                    >
-                      {subButton.name}
-                      <button
-                        onClick={e => {
-                          props.handleRemoveSubButtonClick(index, subIndex, e);
-                        }}
-                      >
-                        -
-                      </button>
-                    </li>
-                  );
-                }
-              )}
-            </ul>
+            <SubButtons
+              index={index}
+              subButtons={button.subButtons}
+              handleAddSubButtonClick={props.handleAddSubButtonClick}
+              handleMenuButtonClick={props.handleMenuButtonClick}
+              handleRemoveSubButtonClick={props.handleRemoveSubButtonClick}
+            />
           </li>
         );
       })}
@@ -173,10 +199,8 @@ const RightPanel = (props: IRightPanelProps) => (
       <input
         type="text"
         value={
-          props.currentEditingButton
+          props.currentEditingButton && props.currentEditingButton.url
             ? props.currentEditingButton.url
-              ? props.currentEditingButton.url
-              : ''
             : ''
         }
         onChange={props.handleUrlInputChange}
@@ -329,18 +353,22 @@ class MenuDesigner extends React.Component<IProps, IState> {
     const currentEditingButton = _.cloneDeep(this.state.currentEditingButton);
     const index = currentEditingButton.index;
     const subIndex = currentEditingButton.subIndex;
-    let button = buttons[index];
-    if (subIndex !== null) {
-      button = button.subButtons[subIndex];
+    let button;
+    if (subIndex === null) {
+      button = buttons[index];
+    } else {
+      button = buttons[index].subButtons[subIndex];
     }
-    for (const key in currentEditingButton) {
-      if (currentEditingButton.hasOwnProperty(key)) {
-        button[key] = currentEditingButton[key];
+    if (button) {
+      for (const key in currentEditingButton) {
+        if (currentEditingButton.hasOwnProperty(key)) {
+          button[key] = currentEditingButton[key];
+        }
       }
+      this.setState({
+        buttons
+      });
     }
-    this.setState({
-      buttons
-    });
   }
 
   private handleNameInputChange(e: React.ChangeEvent<HTMLInputElement>) {
