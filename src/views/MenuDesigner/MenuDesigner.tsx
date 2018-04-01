@@ -65,6 +65,23 @@ interface ISubButtonsProps {
   ) => void;
 }
 
+interface ISelectProps {
+  label: string;
+  value: string;
+  options: Array<{
+    value: string;
+    text: string;
+  }>;
+  handleSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+}
+
+interface IInputProps {
+  label: string;
+  value: string;
+  visible: boolean;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
 enum ButtonType {
   VIEW = 'view',
   BUTTON_GROUP = 'button_group',
@@ -163,49 +180,71 @@ const LeftPanel = (props: ILeftPanelProps) => (
   </div>
 );
 
+const Select = (props: ISelectProps) => (
+  <div>
+    <label>{props.label}: </label>
+    <select value={props.value} onChange={props.handleSelectChange}>
+      {props.options.map((option, index) => {
+        return (
+          <option key={index} value={option.value}>
+            {option.text}
+          </option>
+        );
+      })}
+    </select>
+  </div>
+);
+
+const Input = (props: IInputProps) => {
+  if (props.visible) {
+    return (
+      <div>
+        <label>{props.label}: </label>
+        <input
+          type="text"
+          value={props.value}
+          onChange={props.handleInputChange}
+        />
+      </div>
+    );
+  } else {
+    return null;
+  }
+};
+
 const RightPanel = (props: IRightPanelProps) => (
   <div>
-    <div>
-      <label>name: </label>
-      <input
-        type="text"
-        value={
-          props.currentEditingButton ? props.currentEditingButton.name : ''
-        }
-        onChange={props.handleNameInputChange}
-      />
-    </div>
-    <div>
-      <label>type: </label>
-      <select
-        value={
-          props.currentEditingButton
-            ? props.currentEditingButton.type
-            : ButtonType.VIEW
-        }
-        onChange={props.handleTypeSelectChange}
-      >
-        {buttonTypes.map((type, index) => {
-          return (
-            <option key={index} value={type.value}>
-              {type.text}
-            </option>
-          );
-        })}
-      </select>
-    </div>
-    <div>
-      <label>url: </label>
-      <input
-        type="text"
-        value={
-          props.currentEditingButton && props.currentEditingButton.url
-            ? props.currentEditingButton.url
-            : ''
-        }
-        onChange={props.handleUrlInputChange}
-      />
-    </div>
+    <Input
+      label="name"
+      value={props.currentEditingButton ? props.currentEditingButton.name : ''}
+      visible={true}
+      handleInputChange={props.handleNameInputChange}
+    />
+    <Select
+      label="type"
+      options={buttonTypes}
+      value={
+        props.currentEditingButton
+          ? props.currentEditingButton.type
+          : ButtonType.VIEW
+      }
+      handleSelectChange={props.handleTypeSelectChange}
+    />
+    <Input
+      label="url"
+      value={
+        props.currentEditingButton && props.currentEditingButton.url
+          ? props.currentEditingButton.url
+          : ''
+      }
+      handleInputChange={props.handleUrlInputChange}
+      visible={
+        !!(
+          props.currentEditingButton &&
+          props.currentEditingButton.type === ButtonType.VIEW
+        )
+      }
+    />
     <div>
       <button onClick={props.handleUpdateClick}>update</button>
     </div>
