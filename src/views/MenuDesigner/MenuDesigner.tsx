@@ -17,6 +17,7 @@ interface IButton {
   name: string;
   type: string;
   url?: string;
+  keyword?: string;
   subButtons: Array<IButton>;
 
   index: number;
@@ -45,6 +46,7 @@ interface IRightPanelProps {
   currentEditingButton: IButton | null;
   handleNameInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleUrlInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleKeywordInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleTypeSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   handleUpdateClick: () => void;
 }
@@ -245,6 +247,21 @@ const RightPanel = (props: IRightPanelProps) => (
         )
       }
     />
+    <Input
+      label="keyword"
+      value={
+        props.currentEditingButton && props.currentEditingButton.keyword
+          ? props.currentEditingButton.keyword
+          : ''
+      }
+      handleInputChange={props.handleKeywordInputChange}
+      visible={
+        !!(
+          props.currentEditingButton &&
+          props.currentEditingButton.type === ButtonType.CLICK
+        )
+      }
+    />
     <div>
       <button onClick={props.handleUpdateClick}>update</button>
     </div>
@@ -269,6 +286,7 @@ class MenuDesigner extends React.Component<IProps, IState> {
 
     this.handleNameInputChange = this.handleNameInputChange.bind(this);
     this.handleUrlInputChange = this.handleUrlInputChange.bind(this);
+    this.handleKeywordInputChange = this.handleKeywordInputChange.bind(this);
     this.handleTypeSelectChange = this.handleTypeSelectChange.bind(this);
     this.handleUpdateClick = this.handleUpdateClick.bind(this);
   }
@@ -294,6 +312,7 @@ class MenuDesigner extends React.Component<IProps, IState> {
           currentEditingButton={this.state.currentEditingButton}
           handleNameInputChange={this.handleNameInputChange}
           handleUrlInputChange={this.handleUrlInputChange}
+          handleKeywordInputChange={this.handleKeywordInputChange}
           handleTypeSelectChange={this.handleTypeSelectChange}
           handleUpdateClick={this.handleUpdateClick}
         />
@@ -329,7 +348,6 @@ class MenuDesigner extends React.Component<IProps, IState> {
         id: nextButtonId,
         name: 'new sub-button ' + nextButtonId,
         type: ButtonType.VIEW,
-        url: 'https://',
         subButtons: [],
         index: index,
         subIndex: subButtons.length
@@ -427,6 +445,17 @@ class MenuDesigner extends React.Component<IProps, IState> {
     }
     const currentEditingButton = _.cloneDeep(this.state.currentEditingButton);
     currentEditingButton.url = e.target.value;
+    this.setState({
+      currentEditingButton
+    });
+  }
+
+  private handleKeywordInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!this.state.currentEditingButton) {
+      return;
+    }
+    const currentEditingButton = _.cloneDeep(this.state.currentEditingButton);
+    currentEditingButton.keyword = e.target.value;
     this.setState({
       currentEditingButton
     });
