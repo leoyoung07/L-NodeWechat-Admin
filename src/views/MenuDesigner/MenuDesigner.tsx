@@ -1,3 +1,4 @@
+import { Col, Row } from 'antd';
 import _ from 'lodash';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -25,7 +26,7 @@ interface IButton {
   subIndex: number | null;
 }
 
-interface ILeftPanelProps {
+interface ILeftPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   buttons: Array<IButton>;
   handleAddButtonClick: () => void;
   handleAddSubButtonClick: (index: number) => void;
@@ -42,7 +43,7 @@ interface ILeftPanelProps {
   ) => void;
 }
 
-interface IRightPanelProps {
+interface IRightPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   currentEditingButton: IButton | null;
   handleNameInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleUrlInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -140,7 +141,7 @@ const SubButtons = (props: ISubButtonsProps) => (
 );
 
 const LeftPanel = (props: ILeftPanelProps) => (
-  <div>
+  <div style={{textAlign: 'left'}}>
     <ul>
       {props.buttons.map((button, index) => {
         return (
@@ -215,7 +216,7 @@ const Input = (props: IInputProps) => {
 };
 
 const RightPanel = (props: IRightPanelProps) => (
-  <div>
+  <div style={{textAlign: 'left'}}>
     <Input
       label="name"
       value={props.currentEditingButton ? props.currentEditingButton.name : ''}
@@ -293,29 +294,29 @@ class MenuDesigner extends React.Component<IProps, IState> {
 
   render() {
     return (
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-around'
-        }}
-      >
-        <LeftPanel
-          buttons={this.state.buttons}
-          handleAddButtonClick={this.handleAddButtonClick}
-          handleAddSubButtonClick={this.handleAddSubButtonClick}
-          handleMenuButtonClick={this.handleMenuButtonClick}
-          handleRemoveButtonClick={this.handleRemoveButtonClick}
-          handleRemoveSubButtonClick={this.handleRemoveSubButtonClick}
-        />
-        <RightPanel
-          currentEditingButton={this.state.currentEditingButton}
-          handleNameInputChange={this.handleNameInputChange}
-          handleUrlInputChange={this.handleUrlInputChange}
-          handleKeywordInputChange={this.handleKeywordInputChange}
-          handleTypeSelectChange={this.handleTypeSelectChange}
-          handleUpdateClick={this.handleUpdateClick}
-        />
+      <div>
+        <Row type="flex" justify="space-around" align="middle" style={{textAlign: 'center'}}>
+          <Col span={12}>
+            <LeftPanel
+              buttons={this.state.buttons}
+              handleAddButtonClick={this.handleAddButtonClick}
+              handleAddSubButtonClick={this.handleAddSubButtonClick}
+              handleMenuButtonClick={this.handleMenuButtonClick}
+              handleRemoveButtonClick={this.handleRemoveButtonClick}
+              handleRemoveSubButtonClick={this.handleRemoveSubButtonClick}
+            />
+          </Col>
+          <Col span={12} style={{borderLeft: '1px solid #696969'}}>
+            <RightPanel
+              currentEditingButton={this.state.currentEditingButton}
+              handleNameInputChange={this.handleNameInputChange}
+              handleUrlInputChange={this.handleUrlInputChange}
+              handleKeywordInputChange={this.handleKeywordInputChange}
+              handleTypeSelectChange={this.handleTypeSelectChange}
+              handleUpdateClick={this.handleUpdateClick}
+            />
+          </Col>
+        </Row>
       </div>
     );
   }
