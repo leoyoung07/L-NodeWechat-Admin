@@ -1,4 +1,6 @@
-import { Col, Row } from 'antd';
+import { Button, Col, Form, Input, Row, Select } from 'antd';
+import FormItem from 'antd/lib/form/FormItem';
+import { SelectValue } from 'antd/lib/select';
 import _ from 'lodash';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -48,7 +50,9 @@ interface IRightPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   handleNameInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleUrlInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleKeywordInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleTypeSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleTypeSelectChange: (
+    value: SelectValue, option: React.ReactElement<HTMLOptionElement> | React.ReactElement<HTMLOptionElement>[]
+  ) => void;
   handleUpdateClick: () => void;
 }
 
@@ -68,21 +72,27 @@ interface ISubButtonsProps {
   ) => void;
 }
 
-interface ISelectProps {
+interface ISelectWithLabelProps {
   label: string;
   value: string;
   options: Array<{
     value: string;
     text: string;
   }>;
-  handleSelectChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleSelectChange: (
+    value: SelectValue, option: React.ReactElement<HTMLOptionElement> | React.ReactElement<HTMLOptionElement>[]
+  ) => void;
 }
 
-interface IInputProps {
+interface IInputWithLabelProps {
   label: string;
   value: string;
   visible: boolean;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+interface IUpdateButtonProps {
+  handleUpdateClick: () => void;
 }
 
 enum ButtonType {
@@ -183,10 +193,33 @@ const LeftPanel = (props: ILeftPanelProps) => (
   </div>
 );
 
-const Select = (props: ISelectProps) => (
-  <div>
-    <label>{props.label}: </label>
-    <select value={props.value} onChange={props.handleSelectChange}>
+const formItemLayout = {
+  labelCol: {
+    xs: { span: 24 },
+    sm: { span: 8 },
+  },
+  wrapperCol: {
+    xs: { span: 24 },
+    sm: { span: 16 },
+  },
+};
+
+const tailFormItemLayout = {
+  wrapperCol: {
+    xs: {
+      span: 24,
+      offset: 0,
+    },
+    sm: {
+      span: 16,
+      offset: 8,
+    },
+  },
+};
+
+const SelectWithLabel = (props: ISelectWithLabelProps) => (
+  <FormItem label={props.label} {...formItemLayout}>
+    <Select value={props.value} onChange={props.handleSelectChange}>
       {props.options.map((option, index) => {
         return (
           <option key={index} value={option.value}>
@@ -194,36 +227,43 @@ const Select = (props: ISelectProps) => (
           </option>
         );
       })}
-    </select>
-  </div>
+    </Select>
+  </FormItem>
 );
 
-const Input = (props: IInputProps) => {
+const InputWithLabel = (props: IInputWithLabelProps) => {
   if (props.visible) {
     return (
-      <div>
-        <label>{props.label}: </label>
-        <input
+      <FormItem label={props.label} {...formItemLayout}>
+        <Input
           type="text"
           value={props.value}
           onChange={props.handleInputChange}
         />
-      </div>
+      </FormItem>
     );
   } else {
     return null;
   }
 };
 
+const UpdateButton = (props: IUpdateButtonProps) => {
+  return (
+    <FormItem {...tailFormItemLayout}>
+      <Button onClick={props.handleUpdateClick}>update</Button>
+    </FormItem>
+  );
+};
+
 const RightPanel = (props: IRightPanelProps) => (
-  <div style={{textAlign: 'left'}}>
-    <Input
+  <Form style={{textAlign: 'left'}}>
+    <InputWithLabel
       label="name"
       value={props.currentEditingButton ? props.currentEditingButton.name : ''}
       visible={true}
       handleInputChange={props.handleNameInputChange}
     />
-    <Select
+    <SelectWithLabel
       label="type"
       options={buttonTypes}
       value={
@@ -233,7 +273,7 @@ const RightPanel = (props: IRightPanelProps) => (
       }
       handleSelectChange={props.handleTypeSelectChange}
     />
-    <Input
+    <InputWithLabel
       label="url"
       value={
         props.currentEditingButton && props.currentEditingButton.url
@@ -248,7 +288,7 @@ const RightPanel = (props: IRightPanelProps) => (
         )
       }
     />
-    <Input
+    <InputWithLabel
       label="keyword"
       value={
         props.currentEditingButton && props.currentEditingButton.keyword
@@ -263,10 +303,10 @@ const RightPanel = (props: IRightPanelProps) => (
         )
       }
     />
-    <div>
-      <button onClick={props.handleUpdateClick}>update</button>
-    </div>
-  </div>
+    <UpdateButton
+      handleUpdateClick={props.handleUpdateClick}
+    />
+  </Form>
 );
 
 class MenuDesigner extends React.Component<IProps, IState> {
@@ -462,12 +502,14 @@ class MenuDesigner extends React.Component<IProps, IState> {
     });
   }
 
-  private handleTypeSelectChange(e: React.ChangeEvent<HTMLSelectElement>) {
+  private handleTypeSelectChange(
+    value: SelectValue, option: React.ReactElement<HTMLOptionElement> | React.ReactElement<HTMLOptionElement>[]
+  ) {
     if (!this.state.currentEditingButton) {
       return;
     }
     const currentEditingButton = _.cloneDeep(this.state.currentEditingButton);
-    currentEditingButton.type = e.target.value;
+    currentEditingButton.type = value.toString();
     this.setState({
       currentEditingButton
     });
