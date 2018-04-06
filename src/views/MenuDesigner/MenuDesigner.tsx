@@ -19,13 +19,14 @@ interface IButton {
   id: number;
   name: string;
   type: string;
-  url?: string;
-  keyword?: string;
   subButtons: Array<IButton>;
 
   index: number;
 
   subIndex: number | null;
+  canHaveSubButtons: boolean;
+  url?: string;
+  keyword?: string;
 }
 
 interface ILeftPanelProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -269,7 +270,15 @@ const RightPanel = (props: IRightPanelProps) => (
     />
     <SelectWithLabel
       label="type"
-      options={buttonTypes}
+      options={buttonTypes.filter((buttonType) => {
+        if (!props.currentEditingButton) {
+          return false;
+        } else if (buttonType.value === ButtonType.BUTTON_GROUP) {
+          return props.currentEditingButton.canHaveSubButtons;
+        } else {
+          return true;
+        }
+      })}
       value={
         props.currentEditingButton
           ? props.currentEditingButton.type
@@ -375,7 +384,8 @@ class MenuDesigner extends React.Component<IProps, IState> {
         type: ButtonType.BUTTON_GROUP,
         subButtons: [],
         index: buttons.length,
-        subIndex: null
+        subIndex: null,
+        canHaveSubButtons: true
       };
       buttons.push(newButton);
       this.setState({
@@ -386,21 +396,26 @@ class MenuDesigner extends React.Component<IProps, IState> {
 
   private handleAddSubButtonClick(index: number) {
     const buttons = _.cloneDeep(this.state.buttons);
-    let subButtons = buttons[index].subButtons as Array<IButton>;
-    if (subButtons.length < 5) {
-      const nextButtonId = this.getNextButtonId(subButtons);
-      subButtons.push({
-        id: nextButtonId,
-        name: 'new sub-button ' + nextButtonId,
-        type: ButtonType.VIEW,
-        subButtons: [],
-        index: index,
-        subIndex: subButtons.length
-      });
-      buttons[index].subButtons = subButtons;
-      this.setState({
-        buttons
-      });
+    const button = buttons[index];
+    if (button.type === ButtonType.BUTTON_GROUP) {
+      let subButtons = button.subButtons as Array<IButton>;
+      if (subButtons.length < 5) {
+        const nextButtonId = this.getNextButtonId(subButtons);
+        subButtons.push({
+          id: nextButtonId,
+          name: 'new sub-button ' + nextButtonId,
+          type: ButtonType.VIEW,
+          subButtons: [],
+          index: index,
+          subIndex: subButtons.length,
+          canHaveSubButtons: false
+        });
+        buttons[index].subButtons = subButtons;
+        this.setState({
+          buttons,
+          currentEditingButton: button
+        });
+      }
     }
   }
 
@@ -455,22 +470,18 @@ class MenuDesigner extends React.Component<IProps, IState> {
     const currentEditingButton = _.cloneDeep(this.state.currentEditingButton);
     const index = currentEditingButton.index;
     const subIndex = currentEditingButton.subIndex;
-    let button;
+    if (currentEditingButton.type !== ButtonType.BUTTON_GROUP) {
+      currentEditingButton.subButtons = [];
+    }
     if (subIndex === null) {
-      button = buttons[index];
+      buttons[index] = _.cloneDeep(currentEditingButton);
     } else {
-      button = buttons[index].subButtons[subIndex];
+      buttons[index].subButtons[subIndex] = _.cloneDeep(currentEditingButton);
     }
-    if (button) {
-      for (const key in currentEditingButton) {
-        if (currentEditingButton.hasOwnProperty(key)) {
-          button[key] = currentEditingButton[key];
-        }
-      }
-      this.setState({
-        buttons
-      });
-    }
+    this.setState({
+      buttons,
+      currentEditingButton
+    });
   }
 
   private handleNameInputChange(e: React.ChangeEvent<HTMLInputElement>) {
