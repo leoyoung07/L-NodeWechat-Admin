@@ -1,4 +1,4 @@
-import { Button, Col, Form, Input, Row, Select } from 'antd';
+import { Button, Col, Form, Icon, Input, Row, Select } from 'antd';
 import FormItem from 'antd/lib/form/FormItem';
 import { SelectValue } from 'antd/lib/select';
 import _ from 'lodash';
@@ -41,7 +41,7 @@ interface ILeftPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   handleMenuButtonClick: (
     index: number,
     subIndex: number | null,
-    e: React.MouseEvent<HTMLElement>
+    e: React.FormEvent<HTMLElement>
   ) => void;
 }
 
@@ -127,26 +127,27 @@ const SubButtons = (props: ISubButtonsProps) => (
               props.handleMenuButtonClick(props.index, subIndex, e);
             }}
           >
-            {subButton.name}
-            <button
+            <Button>
+              {subButton.name}
+            </Button>
+            <Icon
+              style={{cursor: 'pointer'}}
+              type="minus-circle-o"
               onClick={e => {
                 props.handleRemoveSubButtonClick(props.index, subIndex, e);
               }}
-            >
-              -
-            </button>
+            />
           </li>
         );
       })}
     </ul>
-    <button
+    <Icon
+      style={{cursor: 'pointer'}}
+      type="plus-circle-o"
       onClick={e => {
         props.handleAddSubButtonClick(props.index);
       }}
-      disabled={props.subButtons.length >= 5}
-    >
-      +
-    </button>
+    />
   </div>
 );
 
@@ -157,18 +158,22 @@ const LeftPanel = (props: ILeftPanelProps) => (
         return (
           <li
             key={index}
-            onClick={e => {
-              props.handleMenuButtonClick(index, null, e);
-            }}
           >
-            {button.name}
-            <button
+            <Button
+              type="primary"
+              onClick={e => {
+                props.handleMenuButtonClick(index, null, e);
+              }}
+            >
+              {button.name}
+            </Button>
+            <Icon
+              style={{cursor: 'pointer'}}
+              type="minus-circle-o"
               onClick={e => {
                 props.handleRemoveButtonClick(index);
               }}
-            >
-              -
-            </button>
+            />
             <SubButtons
               index={index}
               subButtons={button.subButtons}
@@ -181,14 +186,13 @@ const LeftPanel = (props: ILeftPanelProps) => (
       })}
     </ul>
     <div>
-      <button
+      <Icon
+        style={{cursor: 'pointer'}}
+        type="plus-circle-o"
         onClick={e => {
           props.handleAddButtonClick();
         }}
-        disabled={props.buttons.length >= 3}
-      >
-        +
-      </button>
+      />
     </div>
   </div>
 );
@@ -430,7 +434,7 @@ class MenuDesigner extends React.Component<IProps, IState> {
   private handleMenuButtonClick(
     index: number,
     subIndex: number | null,
-    e: React.MouseEvent<HTMLElement>
+    e: React.FormEvent<HTMLElement>
   ) {
     e.stopPropagation();
     const buttons = _.cloneDeep(this.state.buttons);
