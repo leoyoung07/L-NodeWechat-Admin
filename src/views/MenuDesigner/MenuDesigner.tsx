@@ -6,6 +6,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import './MenuDesigner.scss';
 
+const TextArea = Input.TextArea;
+
 interface IProps {
   user: {};
 }
@@ -29,6 +31,17 @@ interface IButton {
   keyword?: string;
 }
 
+interface IFormatedButton {
+  name?: string;
+  type?: string;
+  sub_button?: Array<IFormatedButton>;
+  url?: string;
+  key?: string;
+  media_id?: string;
+  appid?: string;
+  pagepath?: string;
+}
+
 interface ILeftPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   buttons: Array<IButton>;
   handleAddButtonClick: () => void;
@@ -48,6 +61,7 @@ interface ILeftPanelProps extends React.HTMLAttributes<HTMLDivElement> {
 
 interface IRightPanelProps extends React.HTMLAttributes<HTMLDivElement> {
   currentEditingButton: IButton | null;
+  serializedButtons: string;
   handleNameInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleUrlInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleKeywordInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -94,6 +108,12 @@ interface IInputWithLabelProps {
 
 interface IUpdateButtonProps {
   handleUpdateClick: () => void;
+}
+
+interface ITextAreaWithLabelProps {
+  label: string;
+  value: string;
+  disabled: boolean;
 }
 
 enum ButtonType {
@@ -260,6 +280,14 @@ const UpdateButton = (props: IUpdateButtonProps) => {
   );
 };
 
+const TextAreaWithLabel = (props: ITextAreaWithLabelProps) => {
+  return (
+    <FormItem label={props.label} {...formItemLayout}>
+      <TextArea value={props.value} autosize={true} disabled={props.disabled}/>
+    </FormItem>
+  );
+};
+
 const RightPanel = (props: IRightPanelProps) => (
   <Form style={{textAlign: 'left'}}>
     <InputWithLabel
@@ -319,6 +347,11 @@ const RightPanel = (props: IRightPanelProps) => (
     <UpdateButton
       handleUpdateClick={props.handleUpdateClick}
     />
+    <TextAreaWithLabel
+      label="serialized"
+      value={props.serializedButtons}
+      disabled={true}
+    />
   </Form>
 );
 
@@ -367,6 +400,7 @@ class MenuDesigner extends React.Component<IProps, IState> {
               handleKeywordInputChange={this.handleKeywordInputChange}
               handleTypeSelectChange={this.handleTypeSelectChange}
               handleUpdateClick={this.handleUpdateClick}
+              serializedButtons={this.serialize(this.state.buttons)}
             />
           </Col>
         </Row>
@@ -532,6 +566,41 @@ class MenuDesigner extends React.Component<IProps, IState> {
 
   private getNextButtonId(buttons: Array<IButton>) {
     return buttons[buttons.length - 1] ? buttons[buttons.length - 1].id + 1 : 0;
+  }
+
+  private serialize (buttons: Array<IButton>) {
+    const formatedButtons = this.formatButtons(buttons);
+    return JSON.stringify({
+      button: formatedButtons
+    });
+  }
+
+  private formatButtons (buttons: Array<IButton>) {
+    const formatedButtons = buttons.map((button) => {
+      let formatedButton: IFormatedButton;
+      if (button.type === ButtonType.BUTTON_GROUP) {
+        formatedButton = {
+          name: button.name,
+          sub_button: this.formatButtons(button.subButtons)
+        };
+      } else if (button.type === ButtonType.VIEW) {
+        formatedButton = {
+          name: button.name,
+          type: ButtonType.VIEW,
+          url: button.url
+        };
+      } else if (button.type === ButtonType.CLICK) {
+        formatedButton = {
+          name: button.name,
+          type: ButtonType.CLICK,
+          key: button.keyword
+        };
+      } else {
+        formatedButton = {};
+      }
+      return formatedButton;
+    });
+    return formatedButtons;
   }
 }
 
